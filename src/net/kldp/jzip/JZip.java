@@ -2443,12 +2443,10 @@ public class JZip {
 
 		if (dir) {
 			// 디렉토리로 보기인 경우
-
 			if (!tableColumnPath.isDisposed())
 				tableColumnPath.dispose();
 		} else {
 			// 모든 파일 보기인 경우
-
 			if (tableColumnPath.isDisposed())
 				createTablecolumnPath();
 		}
@@ -2469,9 +2467,8 @@ public class JZip {
 			}
 		}
 
-		if (submenuOpenRecent.getItemCount() >= maxSize) {
+		if (submenuOpenRecent.getItemCount() >= maxSize)
 			submenuOpenRecent.getItem(maxSize - 1).dispose();
-		}
 
 		final MenuItem pushOpenRecent = new MenuItem(submenuOpenRecent,
 				SWT.PUSH, 0);
@@ -2517,10 +2514,9 @@ public class JZip {
 		RenameDialog renameDialog = new RenameDialog(sShell, oldName);
 		final String newName = renameDialog.open();
 
-		if (newName == null) {
+		if (newName == null)
 			// 이름 바꾸기 취소
 			return;
-		}
 
 		if (!newName.equals(oldName) && newName.length() != 0) {
 			setStatusLine("항목의 이름을 바꾸는 중입니다.");
@@ -2876,46 +2872,32 @@ public class JZip {
 
 					if (fileNames.length == 1) {
 						// 파일이 하나인 경우
-
-						if (canOpen(fileNames[0])) {
+						if (canOpen(fileNames[0]))
 							// 열 수 있는 파일인 경우
-
 							open(fileNames[0]);
-
-							return;
-						} else {
+						else
 							// 열 수 없는 파일인 경우
-
 							createNewArchive(event, fileNames);
-
-							return;
-						}
 					} else {
 						// 파일이 여러 개인 경우
-
 						createNewArchive(event, fileNames);
-
-						return;
 					}
+					
+					return;
 				} else {
 					// 열려있는 압축 파일이 있는 경우
 
 					if (fileNames.length > 1) {
 						// 파일이 여러 개인 경우
 
-						if (zip.canWrite()) {
+						if (zip.canWrite())
 							// Zip 파일에 대한 쓰기 권한이 있는 경우
-
 							addFilesToArchive(fileNames);
-
-							return;
-						} else {
+						else
 							// Zip 파일에 대한 쓰기 권한이 없는 경우
-
 							cancel(event);
-
-							return;
-						}
+						
+						return;
 					} else {
 						// 파일이 하나인 경우
 
@@ -2934,19 +2916,14 @@ public class JZip {
 								return;
 
 							case ADD: // 추가
-								if (zip.canWrite()) {
+								if (zip.canWrite())
 									// 쓰기 권한이 있는 경우
-
 									addFilesToArchive(fileNames);
-
-									return;
-								} else {
+								else
 									// 쓰기 권한이 없는 경우
-
 									cancel(event);
-
-									return;
-								}
+								
+								return;
 
 							case OPEN: // 열기
 								open(fileNames[0]);
@@ -2956,19 +2933,14 @@ public class JZip {
 						} else {
 							// 열 수 없는 파일인 경우
 
-							if (zip.canWrite()) {
+							if (zip.canWrite())
 								// 쓰기 권한이 있는 경우
-
 								addFilesToArchive(fileNames);
-
-								return;
-							} else {
+							else
 								// 쓰기 권한이 없는 경우
-
 								cancel(event);
-
-								return;
-							}
+							
+							return;
 						}
 					}
 				}

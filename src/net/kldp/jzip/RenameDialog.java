@@ -33,7 +33,6 @@ public class RenameDialog {
 	private Composite composite = null;
 
 	private Button buttonOk = null;
-
 	private Button buttonCancel = null;
 
 	private Label icon = null;

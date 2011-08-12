@@ -32,7 +32,6 @@ public class ProgramSelectDialog {
 	private Composite composite = null;
 
 	private Button buttonOk = null;
-
 	private Button buttonCancel = null;
 
 	private String command;

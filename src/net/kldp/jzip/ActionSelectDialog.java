@@ -35,9 +35,7 @@ public class ActionSelectDialog {
 	private Composite composite = null;
 
 	private Button buttonCancel = null;
-
 	private Button buttonAdd = null;
-
 	private Button buttonOpen = null;
 
 	private Action select;
@@ -51,8 +49,7 @@ public class ActionSelectDialog {
 
 		sShell.setParent(parent);
 
-		File file = new File(fileName);
-		label.setText(file.getName() + label.getText());
+		label.setText(new File(fileName).getName() + label.getText());
 
 		sShell.pack();
 

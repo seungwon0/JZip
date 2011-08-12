@@ -35,11 +35,8 @@ public class OverwriteDialog {
 	private Composite composite = null;
 
 	private Button buttonYes = null;
-
 	private Button buttonNo = null;
-
 	private Button buttonAllYes = null;
-
 	private Button buttonAllNo = null;
 
 	private Label icon = null;

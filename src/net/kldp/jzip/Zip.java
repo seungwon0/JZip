@@ -727,12 +727,9 @@ public class Zip {
 		if (entry.isDirectory()) {
 			// 디렉토리인 경우
 
-			if (tempFile.isFile()) {
+			if (tempFile.isFile())
 				// 같은 이름의 파일이 이미 존재하는 경우
-
-				// 삭제
-				tempFile.delete();
-			}
+				tempFile.delete(); // 삭제
 
 			// 디렉토리 생성
 			tempFile.mkdirs();
@@ -774,24 +771,19 @@ public class Zip {
 							if (zipEntry.isDirectory()) {
 								// 디렉토리인 경우
 
-								if (entryFile.isFile()) {
+								if (entryFile.isFile())
 									// 같은 이름의 파일이 이미 존재하는 경우
-
-									// 삭제
-									entryFile.delete();
-								}
+									entryFile.delete(); // 삭제
 
 								// 디렉토리 생성
 								entryFile.mkdirs();
 							} else {
 								// 파일인 경우
 
-								if (entryFile.isDirectory()) {
+								if (entryFile.isDirectory())
 									// 같은 이름의 디렉토리가 이미 존재하는 경우
-
 									// 모든 하위 디렉토리까지 삭제
 									JZip.deleteDir(entryFile);
-								}
 
 								// 압축 해제
 								extract(zipEntry, entryFile);
@@ -807,12 +799,9 @@ public class Zip {
 		} else {
 			// 파일인 경우
 
-			if (tempFile.isDirectory()) {
+			if (tempFile.isDirectory())
 				// 같은 이름의 디렉토리가 이미 존재하는 경우
-
-				// 모든 하위 디렉토리와 파일까지 삭제
-				JZip.deleteDir(tempFile);
-			}
+				JZip.deleteDir(tempFile); // 모든 하위 디렉토리와 파일까지 삭제
 
 			// 압축 해제
 			extract(entry, tempFile);
@@ -1011,10 +1000,9 @@ public class Zip {
 				messageBox.setText("압축 풀기 완료!");
 				messageBox.setMessage("압축 풀기가 완료되었습니다.\n\n압축 푼 항목들을 표시할까요?");
 
-				if (messageBox.open() == SWT.YES) {
+				if (messageBox.open() == SWT.YES)
 					// 압축 해제한 항목 표시
 					Program.launch(directory.getPath());
-				}
 			}
 
 			/**
@@ -1063,9 +1051,8 @@ public class Zip {
 						}
 					}
 
-					for (int index : indices) {
+					for (int index : indices)
 						indexList.add(index);
-					}
 				} else {
 					// 모두 압축 풀기인 경우
 
@@ -1206,7 +1193,6 @@ public class Zip {
 		String name = entry.getName();
 
 		if (entry.isDirectory())
-			// 디렉토리인 경우
 			name = name.substring(0, name.length() - 1);
 
 		if (name.indexOf('/') == -1)
