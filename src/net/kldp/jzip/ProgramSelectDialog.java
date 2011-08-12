@@ -42,41 +42,39 @@ public class ProgramSelectDialog {
 	 * This method initializes sShell
 	 */
 	private void createSShell() {
-		GridData gridData = new GridData();
-		gridData.heightHint = -1;
-		gridData.widthHint = 250;
-
-		GridData gridData1 = new GridData();
-		gridData1.horizontalAlignment = GridData.CENTER;
-		gridData1.widthHint = 200;
-		gridData1.verticalAlignment = GridData.CENTER;
-
-		GridData gridData2 = new GridData();
-		gridData2.verticalSpan = 2;
-		gridData2.verticalAlignment = GridData.BEGINNING;
-		gridData2.horizontalAlignment = GridData.CENTER;
-
+		sShell = new Shell(SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+		sShell.setImage(JZip.jzipImage);
+		sShell.setText("사용할 프로그램 명령어를 입력하세요.");
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 2;
 		gridLayout.horizontalSpacing = 10;
 		gridLayout.verticalSpacing = 10;
-
-		sShell = new Shell(SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-		sShell.setImage(JZip.jzipImage);
-		sShell.setText("사용할 프로그램 명령어를 입력하세요.");
 		sShell.setLayout(gridLayout);
 		sShell.setSize(new Point(318, 114));
 
+		GridData gridData;
+
 		icon = new Label(sShell, SWT.NONE);
 		icon.setImage(sShell.getDisplay().getSystemImage(SWT.ICON_QUESTION));
-		icon.setLayoutData(gridData2);
+		gridData = new GridData();
+		gridData.verticalSpan = 2;
+		gridData.verticalAlignment = GridData.BEGINNING;
+		gridData.horizontalAlignment = GridData.CENTER;
+		icon.setLayoutData(gridData);
 
 		label = new Label(sShell, SWT.WRAP);
 		label.setText(" 파일을 여는 데 사용할 프로그램 명령어를 입력하세요.");
+		gridData = new GridData();
+		gridData.heightHint = -1;
+		gridData.widthHint = 250;
 		label.setLayoutData(gridData);
 
 		text = new Text(sShell, SWT.BORDER);
-		text.setLayoutData(gridData1);
+		gridData = new GridData();
+		gridData.horizontalAlignment = GridData.CENTER;
+		gridData.widthHint = 200;
+		gridData.verticalAlignment = GridData.CENTER;
+		text.setLayoutData(gridData);
 		text.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 			public void widgetDefaultSelected(
 					org.eclipse.swt.events.SelectionEvent e) {
@@ -116,13 +114,12 @@ public class ProgramSelectDialog {
 	 * 
 	 */
 	private void createComposite() {
+		composite = new Composite(sShell, SWT.NONE);
+		composite.setLayout(new RowLayout());
 		GridData gridData = new GridData();
 		gridData.horizontalAlignment = GridData.END;
 		gridData.horizontalSpan = 2;
 		gridData.verticalAlignment = GridData.CENTER;
-
-		composite = new Composite(sShell, SWT.NONE);
-		composite.setLayout(new RowLayout());
 		composite.setLayoutData(gridData);
 
 		// 확인
@@ -173,8 +170,8 @@ public class ProgramSelectDialog {
 		final Point parentSize = parent.getSize();
 		final Point size = sShell.getSize();
 
-		int x = parentLocation.x + (parentSize.x - size.x) / 2;
-		int y = parentLocation.y + (parentSize.y - size.y) / 2;
+		final int x = parentLocation.x + (parentSize.x - size.x) / 2;
+		final int y = parentLocation.y + (parentSize.y - size.y) / 2;
 
 		if (x >= parentLocation.x && y >= parentLocation.y)
 			sShell.setLocation(x, y);

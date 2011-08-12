@@ -64,8 +64,8 @@ public class OverwriteDialog {
 		final Point parentSize = parent.getSize();
 		final Point size = sShell.getSize();
 
-		int x = parentLocation.x + (parentSize.x - size.x) / 2;
-		int y = parentLocation.y + (parentSize.y - size.y) / 2;
+		final int x = parentLocation.x + (parentSize.x - size.x) / 2;
+		final int y = parentLocation.y + (parentSize.y - size.y) / 2;
 
 		if (x >= parentLocation.x && y >= parentLocation.y)
 			sShell.setLocation(x, y);
@@ -77,16 +77,6 @@ public class OverwriteDialog {
 	 * This method initializes sShell
 	 */
 	private void createSShell() {
-		GridData gridData = new GridData();
-		gridData.verticalAlignment = GridData.CENTER;
-		gridData.heightHint = -1;
-		gridData.widthHint = 360;
-		gridData.horizontalAlignment = GridData.BEGINNING;
-
-		GridData gridData1 = new GridData();
-		gridData1.horizontalAlignment = GridData.CENTER;
-		gridData1.verticalAlignment = GridData.CENTER;
-
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 2;
 		gridLayout.verticalSpacing = 10;
@@ -98,12 +88,22 @@ public class OverwriteDialog {
 		sShell.setImage(JZip.jzipImage);
 		sShell.setText("덮어쓸까요?");
 
+		GridData gridData;
+		
 		icon = new Label(sShell, SWT.NONE);
 		icon.setImage(sShell.getDisplay().getSystemImage(SWT.ICON_QUESTION));
-		icon.setLayoutData(gridData1);
+		gridData = new GridData();
+		gridData.horizontalAlignment = GridData.CENTER;
+		gridData.verticalAlignment = GridData.CENTER;
+		icon.setLayoutData(gridData);
 
 		label = new Label(sShell, SWT.HORIZONTAL | SWT.WRAP);
 		label.setText(" 파일 또는 디렉토리가 이미 존재합니다.\n\n덮어쓸까요?");
+		gridData = new GridData();
+		gridData.verticalAlignment = GridData.CENTER;
+		gridData.heightHint = -1;
+		gridData.widthHint = 360;
+		gridData.horizontalAlignment = GridData.BEGINNING;
 		label.setLayoutData(gridData);
 
 		createComposite();

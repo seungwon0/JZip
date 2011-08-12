@@ -49,7 +49,9 @@ public class ActionSelectDialog {
 
 		sShell.setParent(parent);
 
-		label.setText(new File(fileName).getName() + label.getText());
+		// Show only file name, not full path
+		label.setText(new File(fileName).getName()
+				+ " 파일을 현재 열려있는 압축 파일에 더할까요?\n아니면 새로운 압축 파일로 열까요?");
 
 		sShell.pack();
 
@@ -57,8 +59,8 @@ public class ActionSelectDialog {
 		final Point parentSize = parent.getSize();
 		final Point size = sShell.getSize();
 
-		int x = parentLocation.x + (parentSize.x - size.x) / 2;
-		int y = parentLocation.y + (parentSize.y - size.y) / 2;
+		final int x = parentLocation.x + (parentSize.x - size.x) / 2;
+		final int y = parentLocation.y + (parentSize.y - size.y) / 2;
 
 		if (x >= parentLocation.x && y >= parentLocation.y)
 			sShell.setLocation(x, y);
@@ -71,13 +73,12 @@ public class ActionSelectDialog {
 	 * 
 	 */
 	private void createComposite() {
+		composite = new Composite(sShell, SWT.NONE);
+		composite.setLayout(new RowLayout());
 		GridData gridData = new GridData();
 		gridData.horizontalAlignment = GridData.END;
 		gridData.horizontalSpan = 2;
 		gridData.verticalAlignment = GridData.CENTER;
-
-		composite = new Composite(sShell, SWT.NONE);
-		composite.setLayout(new RowLayout());
 		composite.setLayoutData(gridData);
 
 		// 취소
@@ -171,32 +172,30 @@ public class ActionSelectDialog {
 	 * This method initializes sShell
 	 */
 	private void createSShell() {
-		GridData gridData = new GridData();
-		gridData.widthHint = 340;
-		gridData.heightHint = -1;
-
-		GridData gridData1 = new GridData();
-		gridData1.horizontalAlignment = GridData.CENTER;
-		gridData1.verticalAlignment = GridData.CENTER;
-
+		sShell = new Shell(SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+		sShell.setImage(JZip.jzipImage);
+		sShell.setText("이 파일을 어떻게 처리할까요?");
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 2;
 		gridLayout.verticalSpacing = 10;
 		gridLayout.horizontalSpacing = 10;
 		gridLayout.makeColumnsEqualWidth = false;
-
-		sShell = new Shell(SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-		sShell.setImage(JZip.jzipImage);
-		sShell.setText("이 파일을 어떻게 처리할까요?");
 		sShell.setLayout(gridLayout);
 		sShell.setSize(new Point(360, 80));
 
+		GridData gridData;
+
 		icon = new Label(sShell, SWT.NONE);
 		icon.setImage(sShell.getDisplay().getSystemImage(SWT.ICON_QUESTION));
-		icon.setLayoutData(gridData1);
+		gridData = new GridData();
+		gridData.horizontalAlignment = GridData.CENTER;
+		gridData.verticalAlignment = GridData.CENTER;
+		icon.setLayoutData(gridData);
 
 		label = new Label(sShell, SWT.HORIZONTAL | SWT.WRAP);
-		label.setText(" 파일을 현재 열려있는 압축 파일에 더할까요?\n아니면 새로운 압축 파일로 열까요?");
+		gridData = new GridData();
+		gridData.widthHint = 340;
+		gridData.heightHint = -1;
 		label.setLayoutData(gridData);
 
 		createComposite();

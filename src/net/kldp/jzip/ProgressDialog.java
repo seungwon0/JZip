@@ -52,8 +52,8 @@ public class ProgressDialog {
 		final Point parentSize = parent.getSize();
 		final Point size = sShell.getSize();
 
-		int x = parentLocation.x + (parentSize.x - size.x) / 2;
-		int y = parentLocation.y + (parentSize.y - size.y) / 2;
+		final int x = parentLocation.x + (parentSize.x - size.x) / 2;
+		final int y = parentLocation.y + (parentSize.y - size.y) / 2;
 
 		if (x >= parentLocation.x && y >= parentLocation.y)
 			sShell.setLocation(x, y);

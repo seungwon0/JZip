@@ -57,8 +57,8 @@ public class Zip {
 			} finally {
 				zos.finish();
 			}
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -139,12 +139,7 @@ public class Zip {
 		this.file = file;
 		this.zipFile = zipFile;
 
-		if (dir)
-			// 디렉토리로 보기인 경우
-			path = "";
-		else
-			// 모든 파일로 보기인 경우
-			path = null;
+		path = (dir) ? "" : null;
 
 		loadEntries();
 	}
@@ -173,7 +168,6 @@ public class Zip {
 	 */
 	public void addFile(final Shell shell, final String[] filePaths) {
 		BusyIndicator.showWhile(shell.getDisplay(), new Runnable() {
-
 			// 더할 파일들의 배열
 			private File[] files;
 

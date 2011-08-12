@@ -58,8 +58,8 @@ public class RenameDialog {
 		final Point parentSize = parent.getSize();
 		final Point size = sShell.getSize();
 		
-		int x = parentLocation.x + (parentSize.x - size.x) / 2;
-		int y = parentLocation.y + (parentSize.y - size.y) / 2;
+		final int x = parentLocation.x + (parentSize.x - size.x) / 2;
+		final int y = parentLocation.y + (parentSize.y - size.y) / 2;
 		
 		if (x >= parentLocation.x && y >= parentLocation.y)
 			sShell.setLocation(x, y);
@@ -72,16 +72,14 @@ public class RenameDialog {
 	 *
 	 */
 	private void createComposite() {
+		composite = new Composite(sShell, SWT.NONE);
+		GridLayout gridLayout = new GridLayout();
+		gridLayout.numColumns = 2;
+		composite.setLayout(gridLayout);
 		GridData gridData = new GridData();
 		gridData.horizontalAlignment = GridData.END;
 		gridData.horizontalSpan = 2;
 		gridData.verticalAlignment = GridData.CENTER;
-		
-		GridLayout gridLayout = new GridLayout();
-		gridLayout.numColumns = 2;
-		
-		composite = new Composite(sShell, SWT.NONE);
-		composite.setLayout(gridLayout);
 		composite.setLayoutData(gridData);
 		
 		// 확인
@@ -114,27 +112,15 @@ public class RenameDialog {
 	 * 
 	 */
 	private void createSShell() {
-		GridData gridData = new GridData();
-		
-		GridData gridData1 = new GridData();
-		gridData1.verticalAlignment = GridData.CENTER;
-		gridData1.widthHint = 200;
-		gridData1.grabExcessHorizontalSpace = false;
-		gridData1.horizontalAlignment = GridData.CENTER;
-		
-		GridData gridData2 = new GridData();
-		gridData2.verticalSpan = 2;
-		
+		sShell = new Shell(SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+		sShell.setImage(JZip.jzipImage);
+		sShell.setText("이름 바꾸기");
+		sShell.setSize(new Point(278, 104));
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 2;
 		gridLayout.verticalSpacing = 10;
 		gridLayout.horizontalSpacing = 10;
 		gridLayout.makeColumnsEqualWidth = false;
-		
-		sShell = new Shell(SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-		sShell.setImage(JZip.jzipImage);
-		sShell.setText("이름 바꾸기");
-		sShell.setSize(new Point(278, 104));
 		sShell.setLayout(gridLayout);
 		sShell.addShellListener(new org.eclipse.swt.events.ShellAdapter() {
 			@Override
@@ -143,16 +129,26 @@ public class RenameDialog {
 			}
 		});
 		
+		GridData gridData;
+		
 		icon = new Label(sShell, SWT.NONE);
 		icon.setImage(sShell.getDisplay().getSystemImage(SWT.ICON_QUESTION));
-		icon.setLayoutData(gridData2);
+		gridData = new GridData();
+		gridData.verticalSpan = 2;
+		icon.setLayoutData(gridData);
 		
 		label = new Label(sShell, SWT.NONE);
 		label.setText("새로운 이름 :");
+		gridData = new GridData();
 		label.setLayoutData(gridData);
 		
 		text = new Text(sShell, SWT.BORDER);
-		text.setLayoutData(gridData1);
+		gridData = new GridData();
+		gridData.verticalAlignment = GridData.CENTER;
+		gridData.widthHint = 200;
+		gridData.grabExcessHorizontalSpace = false;
+		gridData.horizontalAlignment = GridData.CENTER;
+		text.setLayoutData(gridData);
 		text.addKeyListener(new org.eclipse.swt.events.KeyAdapter() {
 			@Override
 			public void keyReleased(org.eclipse.swt.events.KeyEvent e) {
