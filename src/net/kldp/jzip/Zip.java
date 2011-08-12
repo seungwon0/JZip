@@ -3,15 +3,29 @@
  */
 package net.kldp.jzip;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
 
 import net.kldp.jzip.OverwriteDialog.Overwrite;
 import net.kldp.jzip.ProgressDialog.ProgressMode;
 
-import org.apache.tools.zip.*;
+import org.apache.tools.zip.ZipEntry;
+import org.apache.tools.zip.ZipFile;
+import org.apache.tools.zip.ZipOutputStream;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.program.Program;
@@ -21,7 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 /**
  * Zip 파일 대한 정보를 담고 있는 클래스
  * 
- * @author jeongseungwon
+ * @author Seungwon Jeong
  * 
  */
 public class Zip {
@@ -125,15 +139,12 @@ public class Zip {
 		this.file = file;
 		this.zipFile = zipFile;
 
-		if (dir) {
+		if (dir)
 			// 디렉토리로 보기인 경우
-
 			path = "";
-		} else {
+		else
 			// 모든 파일로 보기인 경우
-
 			path = null;
-		}
 
 		loadEntries();
 	}
@@ -196,9 +207,8 @@ public class Zip {
 						zos.setEncoding(encoding);
 
 						for (int i = 0; i < entryList.size(); i++) {
-							if (indexSet.contains(i)) {
+							if (indexSet.contains(i))
 								continue;
-							}
 
 							ZipEntry originalEntry = entryList.get(i);
 
@@ -207,18 +217,15 @@ public class Zip {
 
 							// 바뀐 시간 설정
 							long time = originalEntry.getTime();
-							if (time != -1) {
+							if (time != -1)
 								entry.setTime(time);
-							}
 
 							zos.putNextEntry(entry);
 
-							if (!originalEntry.isDirectory()) {
+							if (!originalEntry.isDirectory())
 								// 파일인 경우
-
 								archive(zipFile.getInputStream(originalEntry),
 										zos);
-							}
 
 							zos.closeEntry();
 						}
@@ -260,9 +267,8 @@ public class Zip {
 			private void addFileNDir(Shell shell, ZipOutputStream zos,
 					File[] files, String parent) {
 				for (File file : files) {
-					if (file == null) {
+					if (file == null)
 						continue;
-					}
 
 					if (!file.canRead()) {
 						MessageBox messageBox = new MessageBox(shell, SWT.OK
@@ -280,11 +286,10 @@ public class Zip {
 
 						// 추가할 디렉토리 엔트리
 						ZipEntry entry = null;
-						if (parent == null) {
+						if (parent == null)
 							entry = new ZipEntry(file.getName() + "/");
-						} else {
+						else
 							entry = new ZipEntry(parent + file.getName() + "/");
-						}
 
 						entry.setTime(file.lastModified());
 
@@ -298,9 +303,8 @@ public class Zip {
 
 						// 부모 디렉토리의 이름
 						String parentName = file.getName() + "/";
-						if (parent != null) {
+						if (parent != null)
 							parentName = parent + parentName;
-						}
 
 						// 하위 디렉토리의 모든 파일과 디렉토리도 추가함
 						addFileNDir(shell, zos, file.listFiles(), parentName);
@@ -309,11 +313,10 @@ public class Zip {
 
 						// 추가할 파일 엔트리
 						ZipEntry entry = null;
-						if (parent == null) {
+						if (parent == null)
 							entry = new ZipEntry(file.getName());
-						} else {
+						else
 							entry = new ZipEntry(parent + file.getName());
-						}
 
 						entry.setTime(file.lastModified());
 
@@ -339,9 +342,8 @@ public class Zip {
 			 * @return 덮어쓰기 여부
 			 */
 			private boolean checkOverwrite(String fileName) {
-				if (fileName.endsWith("/")) {
+				if (fileName.endsWith("/"))
 					fileName = fileName.substring(0, fileName.length() - 1);
-				}
 
 				switch (overwrite) {
 				case ALL_YES:
@@ -379,16 +381,14 @@ public class Zip {
 				indexSet = new HashSet<Integer>();
 
 				for (int i = 0; i < files.length; i++) {
-					if (files[i] == null) {
+					if (files[i] == null)
 						continue;
-					}
 
 					// 확인할 파일 이름
 					String fileName = files[i].getName();
 
-					if (path != null) {
+					if (path != null)
 						fileName = path + fileName;
-					}
 
 					// 확인할 디렉토리 이름
 					String dirName = fileName + "/";
@@ -406,9 +406,8 @@ public class Zip {
 							if (checkOverwrite(fileName)) {
 								indexSet.add(j);
 							} else {
-								if (overwrite == Overwrite.CANCEL) {
+								if (overwrite == Overwrite.CANCEL)
 									return;
-								}
 
 								files[i] = null;
 							}
@@ -433,9 +432,8 @@ public class Zip {
 									}
 								}
 							} else {
-								if (overwrite == Overwrite.CANCEL) {
+								if (overwrite == Overwrite.CANCEL)
 									return;
-								}
 
 								files[i] = null;
 							}
@@ -506,9 +504,8 @@ public class Zip {
 
 			try {
 				int i;
-				while ((i = bis.read()) != -1) {
+				while ((i = bis.read()) != -1)
 					bos.write(i);
-				}
 			} finally {
 				bis.close();
 				bos.flush();
@@ -540,11 +537,10 @@ public class Zip {
 		// 인덱스 변환
 		for (ZipEntry entry : entryList) {
 			if (getParentEntryName(entry).equals(path)) {
-				if (index == 0) {
+				if (index == 0)
 					break;
-				} else {
+				else
 					index--;
-				}
 			}
 
 			newIndex++;
@@ -570,9 +566,8 @@ public class Zip {
 
 			try {
 				int i;
-				while ((i = bis.read()) != -1) {
+				while ((i = bis.read()) != -1)
 					bos.write(i);
-				}
 			} finally {
 				bis.close();
 				bos.close();
@@ -611,9 +606,8 @@ public class Zip {
 					// 디렉토리로 보기인 경우
 
 					// 인덱스 변환
-					for (int i = 0; i < indices.length; i++) {
+					for (int i = 0; i < indices.length; i++)
 						indices[i] = convertIndex(indices[i]);
-					}
 
 					for (int index : indices) {
 						ZipEntry dirEntry = entryList.get(index);
@@ -642,9 +636,8 @@ public class Zip {
 					}
 				}
 
-				for (int index : indices) {
+				for (int index : indices)
 					indexList.add(index);
-				}
 			}
 
 			public void run() {
@@ -665,9 +658,8 @@ public class Zip {
 						zos.setEncoding(encoding);
 
 						for (int i = 0; i < entryList.size(); i++) {
-							if (indexList.contains(i)) {
+							if (indexList.contains(i))
 								continue;
-							}
 
 							ZipEntry originalEntry = entryList.get(i);
 							ZipEntry entry = new ZipEntry(originalEntry
@@ -675,18 +667,15 @@ public class Zip {
 
 							// 바뀐 시간 설정
 							long time = originalEntry.getTime();
-							if (time != -1) {
+							if (time != -1)
 								entry.setTime(time);
-							}
 
 							zos.putNextEntry(entry);
 
-							if (!originalEntry.isDirectory()) {
+							if (!originalEntry.isDirectory())
 								// 파일인 경우
-
 								archive(zipFile.getInputStream(originalEntry),
 										zos);
-							}
 
 							zos.closeEntry();
 						}
@@ -722,11 +711,9 @@ public class Zip {
 	 * @return 임시 디렉토리에 압축 해제된 파일 경로
 	 */
 	public String extract(int index) {
-		if (path != null) {
+		if (path != null)
 			// 디렉토리로 보기인 경우
-
 			index = convertIndex(index);
-		}
 
 		// 임시 디렉토리 생성
 		JZip.createTmpDir();
@@ -772,9 +759,8 @@ public class Zip {
 								// 부모 디렉토리 생성
 								File parentDir = new File(tempFile,
 										parentEntryName);
-								if (!parentDir.exists()) {
+								if (!parentDir.exists())
 									parentDir.mkdirs();
-								}
 
 								entryFile = new File(parentDir,
 										getEntryName(zipEntry));
@@ -965,9 +951,8 @@ public class Zip {
 							// 부모 디렉토리 생성
 							File parentDir = new File(directory,
 									parentEntryName);
-							if (!parentDir.exists()) {
+							if (!parentDir.exists())
 								parentDir.mkdirs();
-							}
 
 							entryFile = new File(parentDir, getEntryName(entry));
 						} else {
@@ -1050,9 +1035,8 @@ public class Zip {
 						// 디렉토리로 보기인 경우
 
 						// 인덱스 변환
-						for (int i = 0; i < indices.length; i++) {
+						for (int i = 0; i < indices.length; i++)
 							indices[i] = convertIndex(indices[i]);
-						}
 
 						for (int index : indices) {
 							ZipEntry dirEntry = entryList.get(index);
@@ -1090,9 +1074,8 @@ public class Zip {
 
 					indexList = new ArrayList<Integer>(size);
 
-					for (int i = 0; i < size; i++) {
+					for (int i = 0; i < size; i++)
 						indexList.add(i);
-					}
 				}
 			}
 
@@ -1118,16 +1101,15 @@ public class Zip {
 	 */
 	private void extract(ZipEntry entry, File entryFile) {
 		try {
-			BufferedInputStream bis = new BufferedInputStream(zipFile
-					.getInputStream(entry));
+			BufferedInputStream bis = new BufferedInputStream(
+					zipFile.getInputStream(entry));
 			BufferedOutputStream bos = new BufferedOutputStream(
 					new FileOutputStream(entryFile));
 
 			try {
 				int i;
-				while ((i = bis.read()) != -1) {
+				while ((i = bis.read()) != -1)
 					bos.write(i);
-				}
 			} finally {
 				bis.close();
 				bos.close();
@@ -1187,17 +1169,14 @@ public class Zip {
 	public String[] getDirStrings(String dir) {
 		ArrayList<String> dirList = new ArrayList<String>();
 
-		for (ZipEntry entry : entryList) {
-			if (entry.isDirectory() && getEntryPath(entry).equals(dir)) {
+		for (ZipEntry entry : entryList)
+			if (entry.isDirectory() && getEntryPath(entry).equals(dir))
 				dirList.add(getEntryName(entry));
-			}
-		}
 
-		if (dirList.isEmpty()) {
+		if (dirList.isEmpty())
 			return null;
-		} else {
+		else
 			return dirList.toArray(new String[dirList.size()]);
-		}
 	}
 
 	/**
@@ -1208,10 +1187,9 @@ public class Zip {
 	 * @return {@link ZipEntry}의 이름(경로 포함 안함)
 	 */
 	public String getEntryName(int index) {
-		if (path != null) {
+		if (path != null)
 			// 디렉토리로 보기인 경우
 			index = convertIndex(index);
-		}
 
 		return getEntryName(entryList.get(index));
 	}
@@ -1227,17 +1205,15 @@ public class Zip {
 		// ZipEntry의 이름
 		String name = entry.getName();
 
-		if (entry.isDirectory()) {
+		if (entry.isDirectory())
 			// 디렉토리인 경우
 			name = name.substring(0, name.length() - 1);
-		}
 
-		if (name.indexOf('/') == -1) {
+		if (name.indexOf('/') == -1)
 			// 최상위 디렉토리의 파일인 경우
 			return name;
-		} else {
+		else
 			return name.substring(name.lastIndexOf('/') + 1);
-		}
 	}
 
 	/**
@@ -1250,17 +1226,15 @@ public class Zip {
 	private String getEntryPath(ZipEntry entry) {
 		String name = entry.getName(); // 엔트리의 이름
 
-		if (name.endsWith("/")) {
+		if (name.endsWith("/"))
 			// 디렉토리인 경우
 			name = name.substring(0, name.length() - 1);
-		}
 
-		if (name.indexOf('/') == -1) {
+		if (name.indexOf('/') == -1)
 			// 최상위 디렉토리의 파일인 경우
 			return "/";
-		} else {
+		else
 			return "/" + name.substring(0, name.lastIndexOf('/'));
-		}
 	}
 
 	/**
@@ -1278,15 +1252,10 @@ public class Zip {
 
 			ZipEntry zipEntry = entryList.get(index);
 
-			if (zipEntry.isDirectory()) {
-				// 디렉토리인 경우
-
+			if (zipEntry.isDirectory())
 				return getDirSize(zipEntry);
-			} else {
-				// 파일인 경우
-
+			else
 				return zipEntry.getSize();
-			}
 		} else {
 			// 모든 파일 보기인 경우
 
@@ -1342,19 +1311,16 @@ public class Zip {
 			String parent = getParentEntryName(entry);
 
 			while (parent.length() != 0) {
-				if (zipFile.getEntry(parent) == null) {
+				if (zipFile.getEntry(parent) == null)
 					// 디렉토리 엔트리가 빠져있는 경우
-
 					nameSet.add(parent);
-				}
 
 				parent = getParentEntryName(parent);
 			}
 		}
 
-		for (String name : nameSet) {
+		for (String name : nameSet)
 			entryList.add(new ZipEntry(name));
-		}
 	}
 
 	/**
@@ -1365,9 +1331,8 @@ public class Zip {
 	public long getOriginalLength() {
 		long size = 0;
 
-		for (ZipEntry entry : entryList) {
+		for (ZipEntry entry : entryList)
 			size += entry.getSize();
-		}
 
 		return size;
 	}
@@ -1389,17 +1354,15 @@ public class Zip {
 	 * @return {@link ZipEntry}의 경로(부모 엔트리 이름)
 	 */
 	private String getParentEntryName(String name) {
-		if (name.endsWith("/")) {
+		if (name.endsWith("/"))
 			// 디렉토리인 경우
 			name = name.substring(0, name.length() - 1);
-		}
 
-		if (name.indexOf('/') == -1) {
+		if (name.indexOf('/') == -1)
 			// 최상위 디렉토리의 파일인 경우
 			return "";
-		} else {
+		else
 			return name.substring(0, name.lastIndexOf('/') + 1);
-		}
 	}
 
 	/**
@@ -1419,15 +1382,13 @@ public class Zip {
 	 * @return Zip 파일 내의 현재 경로
 	 */
 	public String getPath() {
-		if (path == null) {
+		if (path == null)
 			return null;
-		}
 
-		if (path.length() == 0) {
+		if (path.length() == 0)
 			return "/";
-		} else {
+		else
 			return "/" + path.substring(0, path.length() - 1);
-		}
 	}
 
 	/**
@@ -1443,11 +1404,9 @@ public class Zip {
 			int count = 0;
 
 			// 숫자 계산
-			for (ZipEntry entry : entryList) {
-				if (getParentEntryName(entry).equals(path)) {
+			for (ZipEntry entry : entryList)
+				if (getParentEntryName(entry).equals(path))
 					count++;
-				}
-			}
 
 			return count;
 		} else {
@@ -1477,13 +1436,12 @@ public class Zip {
 
 			final String name = getEntryName(entry);
 			String size = null;
-			if (entry.isDirectory()) {
+			if (entry.isDirectory())
 				// 디렉토리인 경우
 				size = getSizeString(getDirSize(entry));
-			} else {
+			else
 				// 파일인 경우
 				size = getSizeString(entry.getSize());
-			}
 			final String type = getType(entry);
 			final String time = getTimeString(entry.getTime(), dateFormat);
 
@@ -1522,52 +1480,48 @@ public class Zip {
 
 		int index = -1;
 
-		if ((index = entryName.lastIndexOf('.')) == -1) {
+		if ((index = entryName.lastIndexOf('.')) == -1)
 			return "일반 파일";
-		}
 
 		// 확장자
 		final String extension = entryName.substring(index + 1).toLowerCase();
 
 		if (extension.equals("jpg") || extension.equals("jpeg")
 				|| extension.equals("bmp") || extension.equals("png")
-				|| extension.equals("gif")) {
+				|| extension.equals("gif"))
 			return "그림 파일";
-		} else if (extension.equals("mp3") || extension.equals("wav")
-				|| extension.equals("ogg")) {
+		else if (extension.equals("mp3") || extension.equals("wav")
+				|| extension.equals("ogg"))
 			return "음악 파일";
-		} else if (extension.equals("avi") || extension.equals("mpg")
-				|| extension.equals("mpeg")) {
+		else if (extension.equals("avi") || extension.equals("mpg")
+				|| extension.equals("mpeg"))
 			return "동영상 파일";
-		} else if (extension.equals("txt")) {
+		else if (extension.equals("txt"))
 			return "텍스트  파일";
-		} else if (extension.equals("html") || extension.equals("htm")) {
+		else if (extension.equals("html") || extension.equals("htm"))
 			return "HTML 파일";
-		} else if (extension.equals("zip") || extension.equals("gz")
+		else if (extension.equals("zip") || extension.equals("gz")
 				|| extension.equals("bz2") || extension.equals("rar")
-				|| extension.equals("jar")) {
+				|| extension.equals("jar"))
 			return "압축 파일";
-		} else {
+		else
 			return "일반 파일";
-		}
 	}
 
 	/**
 	 * 부모 디렉토리로 현재 경로를 변경하는 메소드
 	 */
 	public void goToParent() {
-		if (path.length() != 0) {
+		if (path.length() != 0)
 			path = getParentEntryName(path);
-		}
 	}
 
 	/**
 	 * 최상위 디렉토리로 현재 경로를 변경하는 메소드
 	 */
 	public void goToTop() {
-		if (path.length() != 0) {
+		if (path.length() != 0)
 			path = "";
-		}
 	}
 
 	/**
@@ -1578,10 +1532,9 @@ public class Zip {
 	 * @return 디렉토리 여부
 	 */
 	public boolean isDirecotry(int index) {
-		if (path != null) {
+		if (path != null)
 			// 디렉토리로 보기
 			index = convertIndex(index);
-		}
 
 		return entryList.get(index).isDirectory();
 	}
@@ -1613,10 +1566,9 @@ public class Zip {
 
 		originalSize = entryList.size();
 
-		if (path != null) {
+		if (path != null)
 			// 디렉토리로 보기인 경우
 			getMissingEntries();
-		}
 	}
 
 	/**
@@ -1640,10 +1592,9 @@ public class Zip {
 	 *            테이블의 인덱스
 	 */
 	public void openFile(int index) {
-		if (path != null) {
+		if (path != null)
 			// 디렉토리로 보기인 경우
 			index = convertIndex(index);
-		}
 
 		// 임시 디렉토리 생성
 		JZip.createTmpDir();
@@ -1654,10 +1605,9 @@ public class Zip {
 		// 임시 파일
 		File tempFile = new File(JZip.tmpDir, getEntryName(zipEntry));
 
-		if (tempFile.isDirectory()) {
+		if (tempFile.isDirectory())
 			// 같은 이름의 디렉토리가 이미 존재하는 경우
 			JZip.deleteDir(tempFile);
-		}
 
 		// 임시 디렉토리에 압축 해제
 		extract(zipEntry, tempFile);
@@ -1675,10 +1625,9 @@ public class Zip {
 	 *            테이블의 인덱스
 	 */
 	public void openWith(Shell shell, int index) {
-		if (path != null) {
+		if (path != null)
 			// 디렉토리로 보기인 경우
 			index = convertIndex(index);
-		}
 
 		// 열어야하는 ZipEntry
 		ZipEntry zipEntry = entryList.get(index);
@@ -1695,10 +1644,9 @@ public class Zip {
 			// 임시 파일
 			File tempFile = new File(JZip.tmpDir, getEntryName(zipEntry));
 
-			if (tempFile.isDirectory()) {
+			if (tempFile.isDirectory())
 				// 같은 이름의 디렉토리가 이미 존재하는 경우
 				JZip.deleteDir(tempFile);
-			}
 
 			// 임시 디렉토리에 압축 해제
 			extract(zipEntry, tempFile);
@@ -1740,11 +1688,9 @@ public class Zip {
 			}
 		}
 
-		if (path != null) {
+		if (path != null)
 			// 디렉토리로 보기인 경우
-
 			index = convertIndex(index);
-		}
 
 		// 이름을 변경할 ZipEntry
 		final ZipEntry zipEntry = entryList.get(index);
@@ -1754,16 +1700,13 @@ public class Zip {
 
 		// 부모 엔트리 이름
 		final String parentName = getParentEntryName(originalName);
-		if (parentName.length() != 0) {
+		if (parentName.length() != 0)
 			// 부모 엔트리가 있는 경우
-
 			name = parentName + name;
-		}
 
 		// 이름을 변경할 ZipEntry가 디렉토리이면 이름 끝에 '/'를 추가함
-		if (zipEntry.isDirectory()) {
+		if (zipEntry.isDirectory())
 			name += "/";
-		}
 
 		// 변경할 이름
 		final String newName = name;
@@ -1789,10 +1732,9 @@ public class Zip {
 					if (entry.isDirectory()) {
 						// 디렉토리 엔트리인 경우
 
-						if (!newName.endsWith("/")) {
-							entryName = entryName.substring(0, entryName
-									.length() - 1);
-						}
+						if (!newName.endsWith("/"))
+							entryName = entryName.substring(0,
+									entryName.length() - 1);
 
 						if (entryName.equals(newName)) {
 							MessageBox messageBox = new MessageBox(shell,
@@ -1805,9 +1747,8 @@ public class Zip {
 						}
 					} else {
 						// 파일 엔트리인 경우
-						if (newName.endsWith("/")) {
+						if (newName.endsWith("/"))
 							entryName += "/";
-						}
 
 						if (entryName.equals(newName)) {
 							MessageBox messageBox = new MessageBox(shell,
@@ -1850,9 +1791,8 @@ public class Zip {
 
 								ZipEntry entry = null;
 
-								if (i == newIndex) {
+								if (i == newIndex)
 									entry = new ZipEntry(newName);
-								}
 
 								if (entry == null && path != null) {
 									// 디렉토리로 보기인 경우
@@ -1872,24 +1812,20 @@ public class Zip {
 									}
 								}
 
-								if (entry == null) {
+								if (entry == null)
 									entry = new ZipEntry(name);
-								}
 
 								// 바뀐 시간 설정
 								long time = originalEntry.getTime();
-								if (time != -1) {
+								if (time != -1)
 									entry.setTime(time);
-								}
 
 								zos.putNextEntry(entry);
 
-								if (!originalEntry.isDirectory()) {
+								if (!originalEntry.isDirectory())
 									// 파일인 경우
-
 									archive(zipFile
 											.getInputStream(originalEntry), zos);
-								}
 
 								zos.closeEntry();
 							}
@@ -1946,17 +1882,15 @@ public class Zip {
 
 				if (indices == null) {
 					// 모든 항목 저장
-					for (int i = 0; i < entryList.size(); i++) {
+					for (int i = 0; i < entryList.size(); i++)
 						indexList.add(i);
-					}
 				} else {
 					if (path != null) {
 						// 디렉토리로 보기인 경우
 
 						// 인덱스 변환
-						for (int i = 0; i < indices.length; i++) {
+						for (int i = 0; i < indices.length; i++)
 							indices[i] = convertIndex(indices[i]);
-						}
 
 						for (int index : indices) {
 							ZipEntry dirEntry = entryList.get(index);
@@ -1985,9 +1919,8 @@ public class Zip {
 						}
 					}
 
-					for (int index : indices) {
+					for (int index : indices)
 						indexList.add(index);
-					}
 				}
 			}
 
@@ -2020,18 +1953,15 @@ public class Zip {
 
 							// 바뀐 시간 설정
 							long time = originalEntry.getTime();
-							if (time != -1) {
+							if (time != -1)
 								entry.setTime(time);
-							}
 
 							zos.putNextEntry(entry);
 
-							if (!originalEntry.isDirectory()) {
+							if (!originalEntry.isDirectory())
 								// 파일인 경우
-
 								archive(zipFile.getInputStream(originalEntry),
 										zos);
-							}
 
 							zos.closeEntry();
 
@@ -2075,13 +2005,11 @@ public class Zip {
 			return;
 		}
 
-		if (text.startsWith("/")) {
+		if (text.startsWith("/"))
 			text = text.substring(1);
-		}
 
-		if (!text.endsWith("/")) {
+		if (!text.endsWith("/"))
 			text += "/";
-		}
 
 		for (ZipEntry entry : entryList) {
 			if (entry.getName().equals(text)) {
@@ -2099,26 +2027,22 @@ public class Zip {
 				final boolean type1 = o1.isDirectory();
 				final boolean type2 = o2.isDirectory();
 
-				if (type1 && type2) {
+				if (type1 && type2)
 					return 0;
-				}
 
-				if (!type1 && !type2) {
+				if (!type1 && !type2)
 					return 0;
-				}
 
 				if (reverse) {
-					if (type2 && !type1) {
+					if (type2 && !type1)
 						return -1;
-					} else {
+					else
 						return 1;
-					}
 				} else {
-					if (type1 && !type2) {
+					if (type1 && !type2)
 						return -1;
-					} else {
+					else
 						return 1;
-					}
 				}
 			}
 
@@ -2138,11 +2062,10 @@ public class Zip {
 				final String name1 = getEntryName(o1);
 				final String name2 = getEntryName(o2);
 
-				if (reverse) {
+				if (reverse)
 					return name2.compareTo(name1);
-				} else {
+				else
 					return name1.compareTo(name2);
-				}
 			}
 
 		});
@@ -2165,11 +2088,10 @@ public class Zip {
 				final String path1 = getEntryPath(o1);
 				final String path2 = getEntryPath(o2);
 
-				if (reverse) {
+				if (reverse)
 					return path2.compareTo(path1);
-				} else {
+				else
 					return path1.compareTo(path2);
-				}
 			}
 
 		});
@@ -2194,28 +2116,25 @@ public class Zip {
 					size2 = o2.getSize();
 				} else {
 					// 디렉토리로 보기
-					if (o1.isDirectory()) {
+					if (o1.isDirectory())
 						// 디렉토리인 경우
 						size1 = getDirSize(o1);
-					} else {
+					else
 						// 파일인 경우
 						size1 = o1.getSize();
-					}
 
-					if (o2.isDirectory()) {
+					if (o2.isDirectory())
 						// 디렉토리인 경우
 						size2 = getDirSize(o2);
-					} else {
+					else
 						// 파일인 경우
 						size2 = o2.getSize();
-					}
 				}
 
-				if (reverse) {
+				if (reverse)
 					return (int) (size2 - size1);
-				} else {
+				else
 					return (int) (size1 - size2);
-				}
 			}
 
 		});
@@ -2234,11 +2153,10 @@ public class Zip {
 				final long time1 = o1.getTime();
 				final long time2 = o2.getTime();
 
-				if (reverse) {
+				if (reverse)
 					return (int) (time2 - time1);
-				} else {
+				else
 					return (int) (time1 - time2);
-				}
 			}
 
 		});
@@ -2257,11 +2175,10 @@ public class Zip {
 				final String type1 = getType(o1);
 				final String type2 = getType(o2);
 
-				if (reverse) {
+				if (reverse)
 					return type2.compareTo(type1);
-				} else {
+				else
 					return type1.compareTo(type2);
-				}
 			}
 
 		});

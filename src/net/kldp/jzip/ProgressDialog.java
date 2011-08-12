@@ -3,20 +3,22 @@
  */
 package net.kldp.jzip;
 
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.Shell;
 
 /**
- * @author jeongsw
+ * @author Seungwon Jeong
  * 
  */
 public class ProgressDialog {
 
 	public static enum ProgressMode {
-		ARCHIVE, EXTRACT
+		ARCHIVE, EXTRACT,
 	}
 
 	private Shell sShell = null; // @jve:decl-index=0:visual-constraint="0,0"
@@ -34,12 +36,11 @@ public class ProgressDialog {
 		case ARCHIVE:
 			sShell.setText("압축하는 중...");
 			label.setText("압축하는 중입니다.");
-
 			break;
+
 		case EXTRACT:
 			sShell.setText("압축을 푸는 중...");
 			label.setText("압축을 푸는 중입니다.");
-
 			break;
 		}
 
@@ -54,11 +55,10 @@ public class ProgressDialog {
 		int x = parentLocation.x + (parentSize.x - size.x) / 2;
 		int y = parentLocation.y + (parentSize.y - size.y) / 2;
 
-		if (x >= parentLocation.x && y >= parentLocation.y) {
+		if (x >= parentLocation.x && y >= parentLocation.y)
 			sShell.setLocation(x, y);
-		} else {
+		else
 			sShell.setLocation(parentLocation);
-		}
 	}
 
 	public void close() {

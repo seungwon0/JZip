@@ -7,12 +7,13 @@
  * 그리고 Tango 아이콘 테마와 File Roller의 아이콘을 사용합니다.
  * 
  * 저작권 : GNU General Public License
- * 홈페이지 : http://wiki.kldp.org/wiki.php/JZip 
- * 개발자 : 정승원 (jeongseungwon@hanmail.net)
+ * 홈페이지 :  https://github.com/seungwon0/JZip
+ * 개발자 : 정승원 (seungwon0@gmail.com)
  */
 package net.kldp.jzip;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Stack;
@@ -21,24 +22,66 @@ import net.kldp.jzip.ActionSelectDialog.Action;
 
 import org.apache.tools.zip.ZipFile;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.*;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.DropTargetListener;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.ArmEvent;
+import org.eclipse.swt.events.ArmListener;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.*;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Sash;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 /**
  * JZip 프로그램의 메인 클래스
  * 
- * @author jeongseungwon
+ * @author Seungwon Jeong
  * 
  */
 public class JZip {
 
-	public static final File tmpDir = new File(System
-			.getProperty("java.io.tmpdir"), "JZip");
+	public static final File tmpDir = new File(
+			System.getProperty("java.io.tmpdir"), "JZip");
 
 	public static Image jzipImage;
 
@@ -46,13 +89,11 @@ public class JZip {
 	 * 임시 디렉토리를 생성하는 메소드
 	 */
 	public static void createTmpDir() {
-		if (tmpDir.isDirectory()) {
+		if (tmpDir.isDirectory())
 			return;
-		}
 
-		if (tmpDir.isFile()) {
+		if (tmpDir.isFile())
 			tmpDir.delete();
-		}
 
 		tmpDir.mkdirs();
 	}
@@ -64,17 +105,11 @@ public class JZip {
 	 *            삭제할 디렉토리 {@link File}
 	 */
 	public static void deleteDir(File dirFile) {
-		for (File file : dirFile.listFiles()) {
-			if (file.isDirectory()) {
-				// 디렉토리인 경우
-
+		for (File file : dirFile.listFiles())
+			if (file.isDirectory())
 				deleteDir(file);
-			} else {
-				// 파일인 경우
-
+			else
 				file.delete();
-			}
-		}
 
 		dirFile.delete();
 	}
@@ -96,41 +131,34 @@ public class JZip {
 		Display display = Display.getDefault();
 		JZip thisClass = new JZip();
 		thisClass.createSShell();
-		// DnD 기능 설정
-		thisClass.setDnd();
-		// 문맥 메뉴 설정
-		thisClass.setContextMenu();
+		thisClass.setDnd(); // DnD 기능 설정
+		thisClass.setContextMenu(); // 문맥 메뉴 설정
 
 		thisClass.sShell.open();
 
+		thisClass.sShell.layout();
+
 		if (args.length == 1) {
-			if (thisClass.canOpen(args[0])) {
-				// 열 수 있는 파일인 경우
-
+			if (thisClass.canOpen(args[0]))
 				thisClass.open(args[0]);
-			} else {
-				// 열 수 없는 파일인 경우
-
+			else
 				thisClass.createNewArchive(args);
-			}
 		} else if (args.length >= 2) {
 			thisClass.createNewArchive(args);
 		}
 
-		while (!thisClass.sShell.isDisposed()) {
+		while (!thisClass.sShell.isDisposed())
 			if (!display.readAndDispatch())
 				display.sleep();
-		}
 		display.dispose();
 
 		// 임시 디렉토리 삭제
-		if (tmpDir.isDirectory()) {
+		if (tmpDir.isDirectory())
 			deleteDir(tmpDir);
-		}
 	}
 
 	private Shell sShell = null;
-	
+
 	private final String jzip;
 	private final String defaultPath;
 
@@ -179,38 +207,38 @@ public class JZip {
 	private Zip zip = null;
 
 	private Table table = null;
-	
+
 	private TableColumn tableColumnName;
 	private TableColumn tableColumnSize;
 	private TableColumn tableColumnType;
 	private TableColumn tableColumnTime;
 	private TableColumn tableColumnPath;
-	
+
 	private ToolBar toolBar = null;
-	
+
 	private ToolItem toolItemExtract;
 	private ToolItem toolItemAddFile;
 	private ToolItem toolItemAddDir;
-	
+
 	private Composite dirComposite = null;
 	private Composite contentsComposite = null;
-	
+
 	private Button buttonPrev = null;
 	private Button buttonNext = null;
 	private Button buttonUp = null;
 	private Button buttonHome = null;
-	
+
 	private Label compositeSeparator = null;
 	private Label labelPath = null;
 	private Label statusSeparator = null;
 	private Label statusLine = null;
-	
+
 	private Text text = null;
-	
+
 	private Tree tree = null;
 
 	private Sash sash;
-	
+
 	private Stack<String> prevStack;
 	private Stack<String> nextStack;
 
@@ -218,7 +246,7 @@ public class JZip {
 	 * {@link JZip} 클래스의 생성자
 	 */
 	public JZip() {
-		jzip = "JZip 0.9";
+		jzip = "JZip 0.9.1";
 
 		defaultPath = System.getProperty("user.home");
 	}
@@ -247,9 +275,8 @@ public class JZip {
 		directoryDialog.setFilterPath(defaultPath);
 		final String directoryName = directoryDialog.open();
 
-		if (directoryName != null) {
+		if (directoryName != null)
 			addDir(directoryName);
-		}
 	}
 
 	/**
@@ -348,23 +375,19 @@ public class JZip {
 	 * @return 열 수 있는지 여부
 	 */
 	private boolean canOpen(String fileName) {
-		if (fileName == null) {
+		if (fileName == null)
 			return false;
-		}
 
 		File file = new File(fileName);
 
-		if (!file.exists()) {
+		if (!file.exists())
 			return false;
-		}
 
-		if (file.isDirectory()) {
+		if (file.isDirectory())
 			return false;
-		}
 
-		if (!file.canRead()) {
+		if (!file.canRead())
 			return false;
-		}
 
 		try {
 			new ZipFile(file);
@@ -444,24 +467,18 @@ public class JZip {
 		table.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent e) {
 				if (radioDir.getSelection() && zip != null) {
-					if (e.stateMask == SWT.ALT && e.keyCode == SWT.ARROW_UP) {
-						// 위로
+					if (e.stateMask == SWT.ALT && e.keyCode == SWT.ARROW_UP)
 						goToParent();
-					} else if (e.keyCode == SWT.BS) {
-						// 홈으로
+					else if (e.keyCode == SWT.BS)
 						goToHome();
-					} else if (e.stateMask == SWT.ALT && e.keyCode == SWT.HOME) {
-						// 홈으로
+					else if (e.stateMask == SWT.ALT && e.keyCode == SWT.HOME)
 						goToHome();
-					} else if (e.stateMask == SWT.ALT
-							&& e.keyCode == SWT.ARROW_LEFT) {
-						// 뒤로
+					else if (e.stateMask == SWT.ALT
+							&& e.keyCode == SWT.ARROW_LEFT)
 						goPrev();
-					} else if (e.stateMask == SWT.ALT
-							&& e.keyCode == SWT.ARROW_RIGHT) {
-						// 앞으로
+					else if (e.stateMask == SWT.ALT
+							&& e.keyCode == SWT.ARROW_RIGHT)
 						goNext();
-					}
 				}
 			}
 		});
@@ -486,33 +503,31 @@ public class JZip {
 				final int index = table.indexOf(item);
 
 				int dateFormat = DateFormat.MEDIUM;
-				if (radioShort.getSelection()) {
+				if (radioShort.getSelection())
 					dateFormat = DateFormat.SHORT;
-				} else if (radioLong.getSelection()) {
+				else if (radioLong.getSelection())
 					dateFormat = DateFormat.LONG;
-				}
 
 				item.setText(zip.getStrings(index, dateFormat));
 
 				final String type = item.getText(2);
 
-				if (type.equals("디렉토리")) {
+				if (type.equals("디렉토리"))
 					item.setImage(folderImage);
-				} else if (type.equals("그림 파일")) {
+				else if (type.equals("그림 파일"))
 					item.setImage(imageImage);
-				} else if (type.equals("음악 파일")) {
+				else if (type.equals("음악 파일"))
 					item.setImage(audioImage);
-				} else if (type.equals("동영상 파일")) {
+				else if (type.equals("동영상 파일"))
 					item.setImage(videoImage);
-				} else if (type.equals("텍스트 파일")) {
+				else if (type.equals("텍스트 파일"))
 					item.setImage(textImage);
-				} else if (type.equals("HTML 파일")) {
+				else if (type.equals("HTML 파일"))
 					item.setImage(htmlImage);
-				} else if (type.equals("압축 파일")) {
+				else if (type.equals("압축 파일"))
 					item.setImage(archiveImage);
-				} else {
+				else
 					item.setImage(textImage);
-				}
 			}
 		});
 
@@ -947,9 +962,7 @@ public class JZip {
 				message.append("\n바뀐 시간 : "
 						+ Zip.getTimeString(zip.lastModified(), dateFormat));
 				message.append("\n압축 크기 : " + Zip.getSizeString(length));
-				message
-						.append("\n실제 크기 : "
-								+ Zip.getSizeString(originalLength));
+				message.append("\n실제 크기 : " + Zip.getSizeString(originalLength));
 				message.append("\n압축 정도 : " + nf.format(ratio));
 				message.append("\n항목 개수 : " + zip.getOriginalSize());
 
@@ -1199,9 +1212,8 @@ public class JZip {
 			}
 
 			public void widgetSelected(SelectionEvent e) {
-				if (zip != null && radioMs949.getSelection()) {
+				if (zip != null && radioMs949.getSelection())
 					open(zip.getFilePath());
-				}
 			}
 		});
 		radioMs949.addArmListener(new ArmListener() {
@@ -1218,9 +1230,8 @@ public class JZip {
 			}
 
 			public void widgetSelected(SelectionEvent e) {
-				if (zip != null && radioUtf8.getSelection()) {
+				if (zip != null && radioUtf8.getSelection())
 					open(zip.getFilePath());
-				}
 			}
 		});
 		radioUtf8.addArmListener(new ArmListener() {
@@ -1248,6 +1259,7 @@ public class JZip {
 						updateMenu();
 
 						toolBar.moveAbove(null);
+
 						sShell.layout();
 					}
 				} else {
@@ -1282,13 +1294,11 @@ public class JZip {
 					sShell.layout();
 				} else {
 					// 상태 표시줄 숨기기
-					if (!statusSeparator.isDisposed()) {
+					if (!statusSeparator.isDisposed())
 						statusSeparator.dispose();
-					}
 
-					if (!statusLine.isDisposed()) {
+					if (!statusLine.isDisposed())
 						statusLine.dispose();
-					}
 
 					sShell.layout();
 				}
@@ -1355,11 +1365,10 @@ public class JZip {
 
 					table.setSortColumn(tableColumnName);
 
-					if (checkReverse.getSelection()) {
+					if (checkReverse.getSelection())
 						table.setSortDirection(SWT.UP);
-					} else {
+					else
 						table.setSortDirection(SWT.DOWN);
-					}
 				}
 			}
 		});
@@ -1382,11 +1391,10 @@ public class JZip {
 
 					table.setSortColumn(tableColumnSize);
 
-					if (checkReverse.getSelection()) {
+					if (checkReverse.getSelection())
 						table.setSortDirection(SWT.UP);
-					} else {
+					else
 						table.setSortDirection(SWT.DOWN);
-					}
 				}
 			}
 		});
@@ -1409,11 +1417,10 @@ public class JZip {
 
 					table.setSortColumn(tableColumnType);
 
-					if (checkReverse.getSelection()) {
+					if (checkReverse.getSelection())
 						table.setSortDirection(SWT.UP);
-					} else {
+					else
 						table.setSortDirection(SWT.DOWN);
-					}
 				}
 			}
 		});
@@ -1436,11 +1443,10 @@ public class JZip {
 
 					table.setSortColumn(tableColumnTime);
 
-					if (checkReverse.getSelection()) {
+					if (checkReverse.getSelection())
 						table.setSortDirection(SWT.UP);
-					} else {
+					else
 						table.setSortDirection(SWT.DOWN);
-					}
 				}
 			}
 		});
@@ -1464,11 +1470,10 @@ public class JZip {
 
 						table.setSortColumn(tableColumnPath);
 
-						if (checkReverse.getSelection()) {
+						if (checkReverse.getSelection())
 							table.setSortDirection(SWT.UP);
-						} else {
+						else
 							table.setSortDirection(SWT.DOWN);
-						}
 					}
 				}
 			}
@@ -1493,27 +1498,25 @@ public class JZip {
 					updateContents();
 
 					final TableColumn sortColumn = table.getSortColumn();
-					if (sortColumn == null) {
+					if (sortColumn == null)
 						table.setSortColumn(tableColumnName);
-					} else if (sortColumn == tableColumnName) {
+					else if (sortColumn == tableColumnName)
 						table.setSortColumn(tableColumnName);
-					} else if (sortColumn == tableColumnSize) {
+					else if (sortColumn == tableColumnSize)
 						table.setSortColumn(tableColumnSize);
-					} else if (sortColumn == tableColumnType) {
+					else if (sortColumn == tableColumnType)
 						table.setSortColumn(tableColumnType);
-					} else if (sortColumn == tableColumnTime) {
+					else if (sortColumn == tableColumnTime)
 						table.setSortColumn(tableColumnTime);
-					} else if (sortColumn == tableColumnPath) {
+					else if (sortColumn == tableColumnPath)
 						table.setSortColumn(tableColumnPath);
-					} else {
+					else
 						table.setSortColumn(tableColumnName);
-					}
 
-					if (checkReverse.getSelection()) {
+					if (checkReverse.getSelection())
 						table.setSortDirection(SWT.UP);
-					} else {
+					else
 						table.setSortDirection(SWT.DOWN);
-					}
 				}
 			}
 		});
@@ -1542,9 +1545,8 @@ public class JZip {
 			}
 
 			public void widgetSelected(SelectionEvent e) {
-				if (zip != null && radioShort.getSelection()) {
+				if (zip != null && radioShort.getSelection())
 					updateContents();
-				}
 			}
 		});
 		radioShort.addArmListener(new ArmListener() {
@@ -1562,9 +1564,8 @@ public class JZip {
 			}
 
 			public void widgetSelected(SelectionEvent e) {
-				if (zip != null && radioMid.getSelection()) {
+				if (zip != null && radioMid.getSelection())
 					updateContents();
-				}
 			}
 		});
 		radioMid.addArmListener(new ArmListener() {
@@ -1581,9 +1582,8 @@ public class JZip {
 			}
 
 			public void widgetSelected(SelectionEvent e) {
-				if (zip != null && radioLong.getSelection()) {
+				if (zip != null && radioLong.getSelection())
 					updateContents();
-				}
 			}
 		});
 		radioLong.addArmListener(new ArmListener() {
@@ -1613,13 +1613,11 @@ public class JZip {
 					delTree();
 					checkTree.setEnabled(false);
 
-					if (tableColumnPath.isDisposed()) {
+					if (tableColumnPath.isDisposed())
 						createTablecolumnPath();
-					}
 
-					if (zip != null) {
+					if (zip != null)
 						open(zip.getFilePath());
-					}
 				}
 			}
 		});
@@ -1644,6 +1642,7 @@ public class JZip {
 						createDirComposite();
 
 						dirComposite.moveAbove(contentsComposite);
+
 						sShell.layout();
 					}
 
@@ -1656,13 +1655,11 @@ public class JZip {
 						updateTree();
 					}
 
-					if (!tableColumnPath.isDisposed()) {
+					if (!tableColumnPath.isDisposed())
 						tableColumnPath.dispose();
-					}
 
-					if (zip != null) {
+					if (zip != null)
 						open(zip.getFilePath());
-					}
 				}
 			}
 		});
@@ -1688,61 +1685,6 @@ public class JZip {
 
 		submenuItemHelp.setMenu(submenuHelp);
 
-		// README 파일 보기
-		MenuItem pushReadme = new MenuItem(submenuHelp, SWT.PUSH);
-		pushReadme.setImage(new Image(display, getClass().getResourceAsStream(
-				"/icons/16x16/text-x-generic.png")));
-		pushReadme.setText("&README 파일 보기");
-		pushReadme.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-
-			public void widgetSelected(SelectionEvent e) {
-				// README 파일 보여주기
-				InputStream is = getClass().getResourceAsStream(
-						"/docs/README.txt");
-
-				if (is == null) {
-					return;
-				}
-
-				createTmpDir();
-
-				File tempFile = new File(tmpDir, "README.txt");
-
-				if (tempFile.isDirectory()) {
-					deleteDir(tempFile);
-				}
-
-				try {
-					BufferedReader br = new BufferedReader(
-							new InputStreamReader(is, "UTF8"));
-					BufferedWriter bw = new BufferedWriter(new FileWriter(
-							tempFile));
-
-					try {
-						String string;
-						while ((string = br.readLine()) != null) {
-							bw.write(string);
-							bw.newLine();
-						}
-					} finally {
-						br.close();
-						bw.close();
-					}
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-
-				Program.launch(tempFile.getPath());
-			}
-		});
-		pushReadme.addArmListener(new ArmListener() {
-			public void widgetArmed(ArmEvent e) {
-				setStatusLine("README.txt 파일의 내용을 보여줍니다.");
-			}
-		});
-
 		// 홈페이지 방문
 		MenuItem pushHomePage = new MenuItem(submenuHelp, SWT.PUSH);
 		pushHomePage.setImage(new Image(display, getClass()
@@ -1753,31 +1695,12 @@ public class JZip {
 			}
 
 			public void widgetSelected(SelectionEvent e) {
-				Program.launch("http://wiki.kldp.org/wiki.php/JZip");
+				Program.launch("https://github.com/seungwon0/JZip");
 			}
 		});
 		pushHomePage.addArmListener(new ArmListener() {
 			public void widgetArmed(ArmEvent e) {
 				setStatusLine("프로그램 홈페이지를 방문합니다.");
-			}
-		});
-
-		// KLDP.net 프로젝트 페이지 방문
-		MenuItem pushKldp = new MenuItem(submenuHelp, SWT.PUSH);
-		pushKldp.setImage(new Image(display, getClass().getResourceAsStream(
-				"/icons/16x16/text-html.png")));
-		pushKldp.setText("&KLDP.net 프로젝트 페이지 방문");
-		pushKldp.addArmListener(new ArmListener() {
-			public void widgetArmed(ArmEvent e) {
-				setStatusLine("KLDP.net 프로젝트 페이지를 방문합니다.");
-			}
-		});
-		pushKldp.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-
-			public void widgetSelected(SelectionEvent e) {
-				Program.launch("http://kldp.net/projects/jzip");
 			}
 		});
 
@@ -1802,8 +1725,8 @@ public class JZip {
 				message.append(jzip);
 				message.append("\n\n이 프로그램은 Zip 파일 포맷을 지원하는 압축 프로그램입니다.");
 				message.append("\n\n저작권 : GNU General Public License");
-				message.append("\n홈페이지 : http://wiki.kldp.org/wiki.php/JZip");
-				message.append("\n개발자 : 정승원 (jeongseungwon@hanmail.net)");
+				message.append("\n홈페이지 : https://github.com/seungwon0/JZip");
+				message.append("\n개발자 : 정승원 (seungwon0@gmail.com)");
 
 				messageBox.setMessage(message.toString());
 				messageBox.open();
@@ -1832,9 +1755,8 @@ public class JZip {
 		String fileName = fileDialog.open();
 
 		if (fileName != null) {
-			if (!fileName.toLowerCase().endsWith(".zip")) {
+			if (!fileName.toLowerCase().endsWith(".zip"))
 				fileName += ".zip";
-			}
 
 			if (createNew(fileName)) {
 				// 인코딩 설정
@@ -1856,10 +1778,9 @@ public class JZip {
 	private boolean createNew(String fileName) {
 		final File file = getSaveFile(fileName);
 
-		if (file == null) {
+		if (file == null)
 			// 압축 파일 저장 실패
 			return false;
-		}
 
 		Zip.createNew(file);
 
@@ -1884,9 +1805,8 @@ public class JZip {
 
 			setStatusLine("새로운 압축 파일을 생성하는 중입니다.");
 
-			if (zip != null) {
+			if (zip != null)
 				zip.addFile(sShell, fileNames);
-			}
 
 			updateContents();
 		}
@@ -1912,14 +1832,12 @@ public class JZip {
 		sShell.setLayout(gridLayout);
 		sShell.setSize(new Point(712, 460));
 
-		// 도구 모음
 		createToolBar();
 
 		createDirComposite();
 
 		createContentsComposite();
 
-		// 상태 표시줄
 		createStatusLine();
 
 		createMenu();
@@ -2142,20 +2060,18 @@ public class JZip {
 		// 하위 디렉토리명
 		String[] dirStrings = zip.getDirStrings(dir);
 
-		if (dirStrings == null) {
+		if (dirStrings == null)
 			return;
-		}
 
 		for (int i = 0; i < dirStrings.length; i++) {
 			TreeItem treeItem = new TreeItem(parentItem, SWT.NONE);
 			treeItem.setImage(folderImage);
 			treeItem.setText(dirStrings[i]);
 
-			if (dir.equals("/")) {
+			if (dir.equals("/"))
 				treeItem.setData(dir + dirStrings[i]);
-			} else {
+			else
 				treeItem.setData(dir + "/" + dirStrings[i]);
-			}
 
 			createTreeItems(treeItem);
 
@@ -2187,11 +2103,9 @@ public class JZip {
 				.setMessage("선택된 항목을 정말로 삭제하시겠습니까?\n\n한 번 삭제하면, 다시 되돌릴 수 없습니다.");
 
 		if (messageBox.open() == SWT.YES) {
-			final int[] indices = table.getSelectionIndices();
-
 			setStatusLine("항목을 삭제하는 중입니다.");
 
-			zip.delete(sShell, indices);
+			zip.delete(sShell, table.getSelectionIndices());
 
 			updateContents();
 		}
@@ -2201,13 +2115,11 @@ public class JZip {
 	 * Tree를 제거하는 메소드
 	 */
 	private void delTree() {
-		if (!tree.isDisposed()) {
+		if (!tree.isDisposed())
 			tree.dispose();
-		}
 
-		if (!sash.isDisposed()) {
+		if (!sash.isDisposed())
 			sash.dispose();
-		}
 
 		contentsComposite.layout();
 	}
@@ -2222,9 +2134,8 @@ public class JZip {
 		directoryDialog.setFilterPath(defaultPath);
 		String directoryName = directoryDialog.open();
 
-		if (directoryName != null) {
+		if (directoryName != null)
 			extract(directoryName);
-		}
 	}
 
 	/**
@@ -2274,15 +2185,12 @@ public class JZip {
 
 		setStatusLine("압축을 해제하는 중입니다.");
 
-		if (table.getSelectionCount() >= 1) {
+		if (table.getSelectionCount() >= 1)
 			// 선택된 항목이 있는 경우
-
 			zip.extract(sShell, directory, table.getSelectionIndices());
-		} else {
+		else
 			// 선택된 항목이 없는 경우
-
 			zip.extractAll(sShell, directory);
-		}
 
 		updateStatusLine();
 	}
@@ -2361,9 +2269,8 @@ public class JZip {
 	 * 다음 디렉토리로 이동하는 메소드
 	 */
 	private void goNext() {
-		if (nextStack.isEmpty()) {
+		if (nextStack.isEmpty())
 			return;
-		}
 
 		prevStack.add(zip.getPath());
 
@@ -2376,9 +2283,8 @@ public class JZip {
 	 * 이전 디렉토리로 이동하는 메소드
 	 */
 	private void goPrev() {
-		if (prevStack.isEmpty()) {
+		if (prevStack.isEmpty())
 			return;
-		}
 
 		nextStack.add(zip.getPath());
 
@@ -2390,12 +2296,12 @@ public class JZip {
 	/**
 	 * 특정 디렉토리로 이동하는 메소드
 	 * 
-	 * @param path 이동할 경로
+	 * @param path
+	 *            이동할 경로
 	 */
 	private void goTo(String path) {
-		if (path.equals(zip.getPath())) {
+		if (path.equals(zip.getPath()))
 			return;
-		}
 
 		prevStack.add(zip.getPath());
 		nextStack.clear();
@@ -2409,9 +2315,8 @@ public class JZip {
 	 * 최상위 디렉토리로 이동하는 메소드
 	 */
 	private void goToHome() {
-		if (zip.getPath().equals("/")) {
+		if (zip.getPath().equals("/"))
 			return;
-		}
 
 		prevStack.add(zip.getPath());
 		nextStack.clear();
@@ -2425,9 +2330,8 @@ public class JZip {
 	 * 부모 디렉토리로 이동하는 메소드
 	 */
 	private void goToParent() {
-		if (zip.getPath().equals("/")) {
+		if (zip.getPath().equals("/"))
 			return;
-		}
 
 		prevStack.add(zip.getPath());
 		nextStack.clear();
@@ -2450,9 +2354,8 @@ public class JZip {
 		fileDialog.setFilterPath(defaultPath);
 		String fileName = fileDialog.open();
 
-		if (fileName != null) {
+		if (fileName != null)
 			open(fileName);
-		}
 	}
 
 	/**
@@ -2510,9 +2413,8 @@ public class JZip {
 
 		// 인코딩
 		String encoding = "MS949";
-		if (radioUtf8.getSelection()) {
+		if (radioUtf8.getSelection())
 			encoding = "UTF8";
-		}
 
 		ZipFile zipFile = null;
 		try {
@@ -2534,24 +2436,21 @@ public class JZip {
 
 		// 디렉토리로 보기 여부
 		boolean dir = true;
-		if (radioFile.getSelection()) {
+		if (radioFile.getSelection())
 			dir = false;
-		}
-		
+
 		zip = new Zip(file, zipFile, dir);
 
 		if (dir) {
 			// 디렉토리로 보기인 경우
 
-			if (!tableColumnPath.isDisposed()) {
+			if (!tableColumnPath.isDisposed())
 				tableColumnPath.dispose();
-			}
 		} else {
 			// 모든 파일 보기인 경우
 
-			if (tableColumnPath.isDisposed()) {
+			if (tableColumnPath.isDisposed())
 				createTablecolumnPath();
-			}
 		}
 
 		prevStack = new Stack<String>();
@@ -2559,7 +2458,7 @@ public class JZip {
 
 		// 최근 파일 열기 메뉴에 등록
 		final int maxSize = 5;
-		
+
 		for (int i = 0; i < submenuOpenRecent.getItemCount(); i++) {
 			final MenuItem menuItem = submenuOpenRecent.getItem(i);
 
@@ -2583,7 +2482,6 @@ public class JZip {
 		pushOpenRecent.addSelectionListener(new SelectionListener() {
 
 			public void widgetDefaultSelected(SelectionEvent e) {
-
 			}
 
 			public void widgetSelected(SelectionEvent e) {
@@ -2647,9 +2545,8 @@ public class JZip {
 		String fileName = fileDialog.open();
 
 		if (fileName != null) {
-			if (!fileName.toLowerCase().endsWith(".zip")) {
+			if (!fileName.toLowerCase().endsWith(".zip"))
 				fileName += ".zip";
-			}
 
 			if (saveAs(fileName)) {
 				// 압축 파일 저장 완료 대화상자
@@ -2682,22 +2579,18 @@ public class JZip {
 	private boolean saveAs(String fileName) {
 		File file = getSaveFile(fileName);
 
-		if (file == null) {
+		if (file == null)
 			// 압축 파일 저장 실패
 			return false;
-		}
 
 		setStatusLine("압축하는 중입니다.");
 
-		if (table.getSelectionCount() >= 1) {
+		if (table.getSelectionCount() >= 1)
 			// 선택된 항목이 있는 경우
-
 			zip.save(sShell, file, table.getSelectionIndices());
-		} else {
+		else
 			// 선택된 항목이 없는 경우
-
 			zip.saveAll(sShell, file);
-		}
 
 		updateStatusLine();
 
@@ -2884,7 +2777,7 @@ public class JZip {
 		/**
 		 * {@link DropTargetListener}를 구현하는 클래스
 		 * 
-		 * @author jeongsw
+		 * @author Seungwon Jeong
 		 * 
 		 */
 		final class DropListener implements DropTargetListener {
@@ -2940,9 +2833,8 @@ public class JZip {
 
 					setStatusLine("새로운 압축 파일을 생성하는 중입니다.");
 
-					if (zip != null) {
+					if (zip != null)
 						zip.addFile(sShell, fileNames);
-					}
 
 					updateContents();
 
@@ -3105,9 +2997,8 @@ public class JZip {
 			public void dragSetData(DragSourceEvent event) {
 				int[] indices = table.getSelectionIndices();
 				String[] filePaths = new String[indices.length];
-				for (int i = 0; i < filePaths.length; i++) {
+				for (int i = 0; i < filePaths.length; i++)
 					filePaths[i] = zip.extract(indices[i]);
-				}
 				event.data = filePaths;
 			}
 
@@ -3255,17 +3146,15 @@ public class JZip {
 
 			// 디렉토리 도구 모음
 			if (!dirComposite.isDisposed()) {
-				if (prevStack.isEmpty()) {
+				if (prevStack.isEmpty())
 					buttonPrev.setEnabled(false);
-				} else {
+				else
 					buttonPrev.setEnabled(true);
-				}
 
-				if (nextStack.isEmpty()) {
+				if (nextStack.isEmpty())
 					buttonNext.setEnabled(false);
-				} else {
+				else
 					buttonNext.setEnabled(true);
-				}
 
 				final String path = zip.getPath();
 				if (path.equals("/")) {
@@ -3293,13 +3182,11 @@ public class JZip {
 
 				pushSave.setEnabled(true);
 
-				if (selectionCount == itemCount) {
+				if (selectionCount == itemCount)
 					// 모두 선택된 경우
-
 					pushSelectAll.setEnabled(false);
-				} else {
+				else
 					pushSelectAll.setEnabled(true);
-				}
 			} else {
 				// 항목이 하나도 없는 경우
 
@@ -3330,11 +3217,10 @@ public class JZip {
 				if (zip.isDirecotry(table.getSelectionIndex())) {
 					// 선택된 항목이 디렉토리인 경우
 
-					if (radioDir.getSelection()) {
+					if (radioDir.getSelection())
 						contextPushOpenDir.setEnabled(true);
-					} else {
+					else
 						contextPushOpenDir.setEnabled(false);
-					}
 
 					contextPushView.setEnabled(false);
 					contextPushOpen.setEnabled(false);
@@ -3359,9 +3245,8 @@ public class JZip {
 	 * 상태 표시줄을 갱신하는 메소드
 	 */
 	private void updateStatusLine() {
-		if (statusLine.isDisposed()) {
+		if (statusLine.isDisposed())
 			return;
-		}
 
 		if (zip == null) {
 			// Zip 파일이 열려 있지 않은 경우
@@ -3379,10 +3264,8 @@ public class JZip {
 				// 선택된 항목이 있는 경우
 
 				long totalSize = 0;
-				int[] indices = table.getSelectionIndices();
-				for (int index : indices) {
+				for (int index : table.getSelectionIndices())
 					totalSize += zip.getEntrySize(index);
-				}
 
 				text += " 중 " + count + " 항목 선택됨 ("
 						+ Zip.getSizeString(totalSize) + ")";
@@ -3396,18 +3279,15 @@ public class JZip {
 	 * 디렉토리 구조를 갱신하는 메소드
 	 */
 	private void updateTree() {
-		if (tree.isDisposed()) {
+		if (tree.isDisposed())
 			return;
-		}
 
 		tree.removeAll();
 
 		if (zip != null) {
 			TreeItem rootItem = new TreeItem(tree, SWT.NONE);
-			rootItem
-					.setImage(new Image(sShell.getDisplay(), getClass()
-							.getResourceAsStream(
-									"/icons/16x16/package-x-generic.png")));
+			rootItem.setImage(new Image(sShell.getDisplay(), getClass()
+					.getResourceAsStream("/icons/16x16/package-x-generic.png")));
 			rootItem.setText(zip.getFileName());
 			rootItem.setData("/");
 

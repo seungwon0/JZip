@@ -5,23 +5,27 @@ package net.kldp.jzip;
 
 import java.io.File;
 
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.layout.*;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 
 /**
  * 동작 선택 대화상자
  * 
- * @author jeongseungwon
+ * @author Seungwon Jeong
  * 
  */
 public class ActionSelectDialog {
 
 	public static enum Action {
-		CANCEL, ADD, OPEN
+		CANCEL, ADD, OPEN,
 	}
 
 	private Shell sShell = null;
@@ -59,11 +63,10 @@ public class ActionSelectDialog {
 		int x = parentLocation.x + (parentSize.x - size.x) / 2;
 		int y = parentLocation.y + (parentSize.y - size.y) / 2;
 
-		if (x >= parentLocation.x && y >= parentLocation.y) {
+		if (x >= parentLocation.x && y >= parentLocation.y)
 			sShell.setLocation(x, y);
-		} else {
+		else
 			sShell.setLocation(parentLocation);
-		}
 	}
 
 	/**
@@ -219,10 +222,9 @@ public class ActionSelectDialog {
 
 		sShell.open();
 		Display display = sShell.getDisplay();
-		while (!sShell.isDisposed()) {
+		while (!sShell.isDisposed())
 			if (!display.readAndDispatch())
 				display.sleep();
-		}
 
 		return select;
 	}

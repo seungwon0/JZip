@@ -3,21 +3,27 @@
  */
 package net.kldp.jzip;
 
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 
 /**
  * 파일 덮어쓰기 대화상자
  * 
- * @author jeongseungwon
+ * @author Seungwon Jeong
  * 
  */
 public class OverwriteDialog {
 
 	public static enum Overwrite {
-		CANCEL, YES, NO, ALL_YES, ALL_NO
+		CANCEL, YES, NO, ALL_YES, ALL_NO,
 	}
 
 	private Shell sShell = null;
@@ -64,11 +70,10 @@ public class OverwriteDialog {
 		int x = parentLocation.x + (parentSize.x - size.x) / 2;
 		int y = parentLocation.y + (parentSize.y - size.y) / 2;
 
-		if (x >= parentLocation.x && y >= parentLocation.y) {
+		if (x >= parentLocation.x && y >= parentLocation.y)
 			sShell.setLocation(x, y);
-		} else {
+		else
 			sShell.setLocation(parentLocation);
-		}
 	}
 
 	/**
@@ -125,10 +130,9 @@ public class OverwriteDialog {
 
 		sShell.open();
 		Display display = sShell.getDisplay();
-		while (!sShell.isDisposed()) {
+		while (!sShell.isDisposed())
 			if (!display.readAndDispatch())
 				display.sleep();
-		}
 
 		return overwrite;
 	}
@@ -187,15 +191,13 @@ public class OverwriteDialog {
 				}
 			}
 		});
-		buttonNo
-				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-					public void widgetSelected(
-							org.eclipse.swt.events.SelectionEvent e) {
-						overwrite = Overwrite.NO;
+		buttonNo.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
+				overwrite = Overwrite.NO;
 
-						sShell.dispose();
-					}
-				});
+				sShell.dispose();
+			}
+		});
 
 		// 모두 예
 		buttonAllYes = new Button(composite, SWT.NONE);
