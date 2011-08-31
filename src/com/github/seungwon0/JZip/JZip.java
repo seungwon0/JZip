@@ -10,7 +10,7 @@
  * 홈페이지 :  https://github.com/seungwon0/JZip
  * 개발자 : 정승원 (seungwon0@gmail.com)
  */
-package net.kldp.jzip;
+package com.github.seungwon0.JZip;
 
 import java.io.File;
 import java.io.IOException;

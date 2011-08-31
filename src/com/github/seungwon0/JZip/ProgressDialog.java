@@ -1,7 +1,7 @@
 /**
  * ProgressDialog : 진행 상황 표시 대화상자 
  */
-package net.kldp.jzip;
+package com.github.seungwon0.JZip;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;

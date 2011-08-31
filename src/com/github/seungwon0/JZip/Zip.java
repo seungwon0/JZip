@@ -1,7 +1,7 @@
 /**
  * Zip 파일에 대한 정보를 담고 있는 클래스
  */
-package net.kldp.jzip;
+package com.github.seungwon0.JZip;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -20,8 +20,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 
-import net.kldp.jzip.OverwriteDialog.Overwrite;
-import net.kldp.jzip.ProgressDialog.ProgressMode;
 
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipFile;
@@ -31,6 +29,9 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+
+import com.github.seungwon0.JZip.OverwriteDialog.Overwrite;
+import com.github.seungwon0.JZip.ProgressDialog.ProgressMode;
 
 /**
  * Zip 파일 대한 정보를 담고 있는 클래스

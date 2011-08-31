@@ -1,7 +1,7 @@
 /**
  * ActionSelectionDialog : 동작 선택 대화상자
  */
-package net.kldp.jzip;
+package com.github.seungwon0.JZip;
 
 import java.io.File;
 

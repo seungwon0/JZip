@@ -1,7 +1,7 @@
 /**
  * OverwriteDialog : 파일 덮어쓰기 대화상자 
  */
-package net.kldp.jzip;
+package com.github.seungwon0.JZip;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
