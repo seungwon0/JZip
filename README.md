@@ -21,6 +21,8 @@ RUN
 
 	java -jar JZip.jar
 
+(JZip.jar, ant.jar and swt.jar files should be in the same directory.)
+
 
 URL
 ---
