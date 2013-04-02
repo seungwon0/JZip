@@ -1,4 +1,4 @@
+*.class
 /.sconsign.dblite
-/classes/
 /JZip.jar
 /swt.jar
